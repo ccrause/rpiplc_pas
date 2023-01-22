@@ -1,8 +1,7 @@
 program rpiplc_pas;
 
 uses
-  rpi_pins,
-  sysutils, rpiplc_arduino;
+  sysutils, rpiplc_arduino, rpiplc_pins;
 
 procedure cmdlineHelp;
 begin
@@ -91,6 +90,7 @@ begin
 end;
 
 begin
+  val := -1;
   processInputs;
   rpiplc_arduino.initPins;
   case s of
@@ -115,5 +115,7 @@ begin
         digitalWrite(pinAddr, val);
       end;
   end;
+  if s[2] = 'i' then
+    writeln(val);
 end.
 
