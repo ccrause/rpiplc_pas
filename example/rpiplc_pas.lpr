@@ -19,7 +19,7 @@ begin
   WriteLn('');
   WriteLn('-<pin> is the pin number (pins depend on the specific shield option)');
   WriteLn('');
-  WriteLn('<value> (Optional) value to write to pin( 0/1 for digital and relay pins, 0-4095 for analog pins)');
+  WriteLn('<value> (Output only) value to write to pin (0/1 for digital and relay pins, 0-4095 for analog pins)');
 end;
 
 var
