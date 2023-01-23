@@ -1,2 +1,2 @@
 # rpiplc_pas
-Pascal wrapper for rpiplc-lib
+This is a Pascal wrapper for [rpiplc-lib](https://github.com/Industrial-Shields/rpiplc-lib).  This library must be installed for the wrapper to work (see instructions on linked page). This allows one to write Pascal based software that can interact with the digital and analog I/O of the [Raspberry Pi based PLC](https://www.industrialshields.com/programmable-logic-controllers-based-on-arduino-raspberry-pi-and-esp32-20220909-lp#raspberry).
