@@ -24,6 +24,7 @@ var
 begin
   if (ParamCount < 3) then
   begin
+    WriteLn('Error, received only ', ParamCount, ' parameters, expecting 3.');
     cmdlineHelp;
     halt(1);
   end;
