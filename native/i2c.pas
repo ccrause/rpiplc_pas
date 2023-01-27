@@ -8,6 +8,8 @@ type
   { TI2cMaster }
 
   TI2cMaster = class
+    constructor Create; virtual;
+    destructor Destroy;
     function Initialize(i2cPort: TI2CBus): boolean;
     function ReadByteFromReg(i2caddress, regAddress: byte; out data: byte): boolean; overload;
     function ReadByteFromReg(i2caddress: byte; regAddress: uint16; out data: byte): boolean; overload;
@@ -87,6 +89,17 @@ type
   end;
 
 { TI2cMaster }
+
+constructor TI2cMaster.Create;
+begin
+  Fi2cHandle := -1;
+end;
+
+destructor TI2cMaster.Destroy;
+begin
+  if Fi2cHandle <> -1 then
+    FpClose(Fi2cHandle);
+end;
 
 function TI2cMaster.Initialize(i2cPort: TI2CBus): boolean;
 var

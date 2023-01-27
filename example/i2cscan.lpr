@@ -12,7 +12,8 @@ begin
   if not i2cMaster.Initialize(i2c_1) then
   begin
     writeln('Error opening i2c device: ', i2c_1);
-    exit;
+    i2cMaster.Free;
+    Halt(1);
   end;
 
   writeln('Starting scanning right adjusted addresses $00 - $7f.');
@@ -31,5 +32,6 @@ begin
     end;
     writeln;
   end;
+  i2cMaster.Free;
 end.
 
