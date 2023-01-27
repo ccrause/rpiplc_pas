@@ -65,10 +65,11 @@ var
   val: byte;
 
 begin
+  processInputs;
   i2cMaster := TI2cMaster.Create;
   if not i2cMaster.Initialize(bus) then
   begin
-    writeln('Error opening i2c device: ', i2c_1);
+    writeln('Error opening i2c device: ', bus);
     i2cMaster.Free;
     Halt(1);
   end;
