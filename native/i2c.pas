@@ -23,13 +23,14 @@ type
       ): boolean; overload;
 
     function WriteBytes(address: byte; const data: PByte; size: byte): boolean;
+    function ReadBytes(address: byte; data: PByte; size: byte): boolean;
     // Check if there is an ACK when prompting the address
     function CheckAddress(address: byte): boolean;
   private
     Fi2cHandle: integer;
-    function ReadByte(address: byte; out data: byte): boolean;
-    function ReadBytes(address: byte; data: PByte; size: byte): boolean;
-    function WriteByte(address: byte; const data: byte): boolean;
+    //function ReadByte(address: byte; out data: byte): boolean;
+    //function ReadBytes(address: byte; data: PByte; size: byte): boolean;
+    //function WriteByte(address: byte; const data: byte): boolean;
    end;
 
 implementation
@@ -143,12 +144,14 @@ function TI2cMaster.ReadByteFromReg(i2caddress: byte; regAddress: uint16; out
 var
   msgs: array[0..1] of Ti2c_msg;
   ioctl_data: Ti2c_rdwr_ioctl_data;
+  buf: array[0..1] of byte;
 begin
-  // TODO: check that regAddress is 10 bits wide;
+  buf[0] := hi(regAddress);
+  buf[1] := lo(regAddress);
   msgs[0].addr := i2caddress;
-  msgs[0].flags := I2C_TENBIT;
+  msgs[0].flags := 0;
   msgs[0].len := 2;
-  msgs[0].buf := @regAddress;
+  msgs[0].buf := @buf;
 
   msgs[1].addr := i2caddress;
   msgs[1].flags := I2C_M_RD or I2C_M_NOSTART;
@@ -200,12 +203,14 @@ function TI2cMaster.ReadBytesFromReg(i2caddress: byte; regAddress: uint16;
 var
   msgs: array[0..1] of Ti2c_msg;
   ioctl_data: Ti2c_rdwr_ioctl_data;
+  buf: array[0..1] of byte;
 begin
-  // TODO: check that regAddress is 10 bits wide;
+  buf[0] := hi(regAddress);
+  buf[1] := lo(regAddress);
   msgs[0].addr := i2caddress;
-  msgs[0].flags := I2C_TENBIT;
+  msgs[0].flags := 0;
   msgs[0].len := 2;
-  msgs[0].buf := @regAddress;
+  msgs[0].buf := @buf;
 
   msgs[1].addr := i2caddress;
   msgs[1].flags := I2C_M_RD or I2C_M_NOSTART;
@@ -375,21 +380,43 @@ begin
   Result :=  FpIOCtl(Fi2cHandle, I2C_RDWR, @ioctl_data) >= 0;
 end;
 
-function TI2cMaster.ReadByte(address: byte; out data: byte): boolean;
-begin
-
-end;
+//function TI2cMaster.ReadByte(address: byte; out data: byte): boolean;
+//begin
+//
+//end;
 
 function TI2cMaster.ReadBytes(address: byte; data: PByte; size: byte): boolean;
+var
+  msgs: array[0..1] of Ti2c_msg;
+  ioctl_data: Ti2c_rdwr_ioctl_data;
 begin
+  msgs[0].addr := address;
+  msgs[0].flags := 0;
+  msgs[0].len := 0;
+  msgs[0].buf := nil;
 
+  msgs[1].addr := address;
+  msgs[1].flags := I2C_M_RD or I2C_M_NOSTART;
+  msgs[1].len := size;
+  msgs[1].buf := @data;
+
+  ioctl_data.msgs := @msgs;
+  ioctl_data.nmsgs := 2;
+
+  if (FpIOCtl(Fi2cHandle, I2C_RDWR, @ioctl_data) < 0) then
+  begin
+    writeln('i2c_read error');
+    Result := false;
+  end
+  else
+    Result := true;
 end;
 
 
-function TI2cMaster.WriteByte(address: byte; const data: byte): boolean;
-begin
-
-end;
+//function TI2cMaster.WriteByte(address: byte; const data: byte): boolean;
+//begin
+//
+//end;
 
 end.
 
