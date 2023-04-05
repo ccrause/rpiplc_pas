@@ -294,7 +294,7 @@ begin
   msgs[0].buf := @regAddress;
 
   msgs[1].addr := i2caddress;
-  msgs[1].flags := 0;
+  msgs[1].flags := I2C_M_NOSTART;
   msgs[1].len := size;
   msgs[1].buf := data;
 
@@ -325,7 +325,7 @@ begin
   msgs[0].buf := @buf;
 
   msgs[1].addr := i2caddress;
-  msgs[1].flags := 0;
+  msgs[1].flags := I2C_M_NOSTART;
   msgs[1].len := size;
   msgs[1].buf := data;
 
