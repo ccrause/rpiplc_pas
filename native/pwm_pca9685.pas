@@ -37,6 +37,7 @@ type
     // Set PWM ON and OFF start counts.  A PWM cycle is divided into 4096 counts.
     // For simple PWM, set onStartTime=0, then (offStartTime-1)/4096 will be the ON duty cycle
     function setPWM(channel: byte; onStartTime, offStartTime: uint16): boolean;
+    function getPWM(channel: byte; var onStartTime, offStartTime: uint16): boolean;
 
     // Helper for typical Servo motors, specify ON time
     function setOnMicroseconds(channel: uint32; us: int16): boolean;
@@ -223,19 +224,31 @@ begin
   tmp[2] := byte(offStartTime);
   tmp[3] := offStartTime shr 8;
 
-  Result := fi2c.WriteBytesToReg(fI2CAddress, byte(LED0_ON_L + 4*channel), @tmp[0], 4);
+  Result := fi2c.WriteBytesToReg(fI2CAddress, byte(LED0_ON_L + 4*channel), @tmp[0], Length(tmp));
   if not Result then exit;
 
   // Wait for settings to update, then check if SLEEP is cleared
   sysutils.Sleep(1);
-  Result := fi2c.ReadBytesFromReg(fI2CAddress, byte(MODE1), @tmp[0], 1);
+  Result := fi2c.ReadByteFromReg(fI2CAddress, byte(MODE1), tmp[0]);
   if not Result then exit;
 
   if tmp[0] and SLEEP > 0 then
   begin
     tmp[0] := tmp[0] and not(SLEEP);
-    Result := fi2c.WriteBytesToReg(fI2CAddress, byte(MODE1), @tmp[0], 1);
+    Result := fi2c.WriteByteToReg(fI2CAddress, byte(MODE1), tmp[0]);
   end;
+end;
+
+function TPwmPca9685.getPWM(channel: byte; var onStartTime, offStartTime: uint16
+  ): boolean;
+var
+  tmp: array[0..3] of byte;
+begin
+  Result := fi2c.ReadBytesFromReg(fI2CAddress, byte(LED0_ON_L + 4*channel), @tmp[0], 4);
+  if not Result then exit;
+
+  onStartTime := tmp[0] + (tmp[1] shl 8);
+  offStartTime := tmp[2] + (tmp[3] shl 8);
 end;
 
 function TPwmPca9685.setOnMicroseconds(channel: uint32; us: int16): boolean;
@@ -258,14 +271,14 @@ begin
     Result := fi2c.ReadByteFromReg(fI2CAddress, byte((LED0_ON_L+1) + 4*channel), tmp);
     if not Result then exit;
     tmp := tmp or (1 shl 4);
-    Result := fi2c.WriteBytesToReg(fI2CAddress, byte((LED0_ON_L+1) + 4*channel), @tmp, 1);
+    Result := fi2c.WriteByteToReg(fI2CAddress, byte((LED0_ON_L+1) + 4*channel), tmp);
   end
   else
   begin
     Result := fi2c.ReadByteFromReg(fI2CAddress, byte((LED0_ON_L+3) + 4*channel), tmp);
     if not Result then exit;
     tmp := tmp or (1 shl 4);
-    Result := fi2c.WriteBytesToReg(fI2CAddress, byte((LED0_ON_L+3) + 4*channel), @tmp, 1);
+    Result := fi2c.WriteByteToReg(fI2CAddress, byte((LED0_ON_L+3) + 4*channel), tmp);
   end;
 end;
 
@@ -276,12 +289,12 @@ begin
   Result := fi2c.ReadByteFromReg(fI2CAddress, byte((LED0_ON_L+1) + 4*channel), tmp);
   if not Result then exit;
   tmp := tmp and $EF;  // Clear bit 4
-  Result := fi2c.WriteBytesToReg(fI2CAddress, byte((LED0_ON_L+1) + 4*channel), @tmp, 1);
+  Result := fi2c.WriteByteToReg(fI2CAddress, byte((LED0_ON_L+1) + 4*channel), tmp);
 
   Result := fi2c.ReadByteFromReg(fI2CAddress, byte((LED0_ON_L+3) + 4*channel), tmp);
   if not Result then exit;
   tmp := tmp and $EF;  // Clear bit 4
-  Result := fi2c.WriteBytesToReg(fI2CAddress, byte((LED0_ON_L+3) + 4*channel), @tmp, 1);
+  Result := fi2c.WriteByteToReg(fI2CAddress, byte((LED0_ON_L+3) + 4*channel), tmp);
 end;
 
 end.
