@@ -1,0 +1,11 @@
+*.hex
+*.bin
+*.elf
+*.bak
+*.s
+*.lss
+*.o
+*.ppu
+*.lps
+**/backup/*
+**/lib/*
