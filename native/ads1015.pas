@@ -86,22 +86,28 @@ const
 
 implementation
 
+const
+  errMsg = 'Error calling ';
+
 function TADS101x.Initialize(Ai2c: TI2cMaster; I2Caddress: byte): boolean;
 begin
   fi2c := Ai2c;
   fI2Caddress := I2Caddress;
+  Result := true;
 end;
 
 function TADS101x.reset: boolean;
 const
-  configResetStateHi = %10000101;
-  configResetStateLo = %10000011;
+  configResetStateHi = %10000101; // Start single shot mode, FSR = 2.048V, Single shot mode or power down
+  configResetStateLo = %10000011; // 128 SPS, Disable comparator
 var
   buf: array[0..1] of byte;
 begin
   buf[0] := configResetStateHi;
   buf[1] := configResetStateLo;
-  fi2c.WriteBytesToReg(fI2Caddress, byte(ConfigReg), @buf[0], length(buf));
+  Result := fi2c.WriteBytesToReg(fI2Caddress, byte(ConfigReg), @buf[0], length(buf));
+  if not Result then
+    WriteLn(errMsg, 'WriteBytesToReg');
 end;
 
 function TADS101x.readChannel(const address: byte; index: byte): uint16;
@@ -119,7 +125,7 @@ begin
   buf[1] := ConfigCompQueOff or ConfigCompLatchOff or ConfigCompPolLow or
             ConfigCompModeStandard or ConfigDataRate1600;
 
-  Result := 0;
+  Result := $FFFF;
   if fi2c.WriteBytesToReg(address, byte(ConfigReg), @buf[0], length(buf)) then
   begin
     // Wait for conversion to complete - could also poll Status bit of configuration register
@@ -131,8 +137,12 @@ begin
       // Limit negative values to 0
       if Result > $07ff then
         Result := 0;
-    end;
-  end;
+    end
+    else
+      WriteLn(errMsg, 'ReadBytesFromReg');
+  end
+  else
+    WriteLn(errMsg, 'WriteBytesToReg');
 end;
 
 end.
