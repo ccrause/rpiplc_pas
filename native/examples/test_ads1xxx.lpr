@@ -5,7 +5,7 @@ program test_ads1xxx;
   100% and back to generate a pulsing light when connected to an LED. }
 
 uses
-  sysutils, ads1015, i2c;
+  sysutils, ads1x1x, i2c;
 
 const
   channel = 3;
