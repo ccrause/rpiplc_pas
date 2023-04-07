@@ -1,4 +1,4 @@
-unit ads1015;
+unit ads1x1x;
 
 interface
 
