@@ -14,8 +14,8 @@ const
 var
   i2cMaster: TI2cMaster;
   adc: TADS101x;
-  val: uint16;
-  voltage: double;
+  val: int16;
+  voltage: integer;
 
 begin
   i2cMaster := TI2cMaster.Create;
@@ -31,8 +31,8 @@ begin
 
     repeat
       val := adc.readChannel($48, channel);
-      voltage := val / 32768 *4.096;
-      WriteLn('Value read from channel ', channel, ' = ', val, ' [', voltage:4:3, 'V]');
+      voltage := (integer(val) * 4096) div 32768;
+      WriteLn('Value read from channel ', channel, ' = ', val, ' [', voltage, 'mV]');
       Sleep(250);
     until false
   end
