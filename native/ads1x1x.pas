@@ -120,23 +120,35 @@ const
 var
   buf: array[0..1] of byte;
 begin
+  Result := -1;
+
+  // Start conversion on specified channel
   buf[0] := ConfigModeSingleShot or ConfigPGA_FSR_4096 or
             ConfigOSStartConversion or muxSingleEnded[index];
   buf[1] := ConfigCompQueOff or ConfigCompLatchOff or ConfigCompPolLow or
             ConfigCompModeStandard or ConfigDataRate1600;
-
-  Result := -1;
   if fi2c.WriteBytesToReg(address, byte(ConfigReg), @buf[0], length(buf)) then
   begin
-    // Wait for conversion to complete - could also poll Status bit of configuration register
-    Sleep(1);
+    // Wait for conversion to complete - OS bit is 0 while performing a conversion
+    if not fi2c.ReadByteFromReg(address, byte(ConfigReg), buf[0]) then
+    begin
+      buf[0] := 0;
+      WriteLn(errMsg, 'ReadByteFromReg');
+    end;
+    while (buf[0] and ConfigOSStartConversion) = 0 do
+    begin
+      Sleep(1);
+      if not fi2c.ReadByteFromReg(address, byte(ConfigReg), buf[0]) then
+      begin
+        WriteLn(errMsg, 'ReadByteFromReg. Abandon waiting for result.');
+        Break;
+      end;
+    end;
+
     if fi2c.ReadBytesFromReg(address, byte(ConversionReg), @buf[0], length(buf)) then
     begin
-      // Convert from right adjusted 12 bit value
+      // Interpret data as 16 bit value, even for ADS101x which returns a 12 bit value
       Result := ((buf[0] shl 8) or buf[1]);
-      // Limit negative values to 0
-      //if Result > $07ff then
-      //  Result := 0;
     end
     else
       WriteLn(errMsg, 'ReadBytesFromReg');
