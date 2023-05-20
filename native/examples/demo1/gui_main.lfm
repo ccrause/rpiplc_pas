@@ -1,10 +1,10 @@
 object Form1: TForm1
-  Left = 226
-  Height = 135
-  Top = 85
+  Left = 903
+  Height = 196
+  Top = 286
   Width = 326
-  Caption = 'Form1'
-  ClientHeight = 135
+  Caption = 'Analog voltage I/O'
+  ClientHeight = 196
   ClientWidth = 326
   OnShow = FormShow
   LCLVersion = '2.2.4.0'
@@ -13,27 +13,50 @@ object Form1: TForm1
     Height = 135
     Top = 0
     Width = 154
-    AntiAliased = aaQuadral
+    AntiAliased = aaBiline
     Caption = 'Voltage'
     CaptionFont.Height = -5
-    IndMaximum = 3
+    IndMaximum = 8
     IndMinimum = 1
-    NumberMainTicks = 4
-    Position = 4
-    Scale = 4
-    ScaleMax = 4
+    LengthSubTicks = 4
+    NumberMainTicks = 10
+    Scale = 10
+    ScaleMax = 10
     Font.Height = -5
   end
   object mKnob1: TmKnob
-    Left = 225
-    Height = 60
+    Left = 220
+    Height = 80
     Top = 24
-    Width = 60
+    Width = 79
     AngleRange = arTop120
-    Position = 50
-    MarkStyle = msTriangle
+    Position = 4095
     Max = 4095
     OnChange = mKnob1Change
+  end
+  object LEDNumber1: TLEDNumber
+    Left = 24
+    Height = 30
+    Top = 152
+    Width = 68
+    Caption = '1.234'
+    Columns = 4
+  end
+  object Label1: TLabel
+    Left = 96
+    Height = 22
+    Top = 155
+    Width = 54
+    Caption = 'Voltage'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 208
+    Height = 22
+    Top = 112
+    Width = 106
+    Caption = 'Voltage setting'
+    ParentColor = False
   end
   object Timer1: TTimer
     Interval = 50
