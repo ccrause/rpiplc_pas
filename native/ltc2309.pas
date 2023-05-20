@@ -81,14 +81,8 @@ begin
     // b is config, not register address, but this follows fig 10 - Write, read, start conversion
     // TODO: confirm that repeated start bit is not required
     if fi2c.ReadBytesFromReg(address, b, @buf[0], length(buf)) then
-    begin
-      // Convert from right adjusted 12 bit value
-      Result := ((buf[0] shl 8) or buf[1]) shr 4;
-
-      // Limit negative values to 0 - not required for single ended conversion
-      //if Result > $07ff then
-      //  Result := 0;
-    end;
+      // Result is a 12 bit left adjusted value
+      Result := ((buf[0] shl 8) or buf[1]);
   end
   else
     Result := $FFFF;
