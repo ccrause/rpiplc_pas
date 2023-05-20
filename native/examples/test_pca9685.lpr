@@ -8,7 +8,7 @@ uses
   sysutils, pwm_pca9685, i2c;
 
 const
-  channel = 0;
+  channel = 4;
   errMsg = 'Error calling ';
 
 var
@@ -21,7 +21,7 @@ begin
   i2cMaster := TI2cMaster.Create;
   if i2cMaster.Initialize(i2c_1) then
   begin
-   if not Assigned(i2cMaster) or not PWM.Initialize(i2cMaster) then
+   if not Assigned(i2cMaster) or not PWM.Initialize(i2cMaster, $41) then
     begin
       WriteLn(errMsg, 'Initialize');
       exit;
