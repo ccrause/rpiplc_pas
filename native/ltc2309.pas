@@ -89,7 +89,9 @@ begin
       //if Result > $07ff then
       //  Result := 0;
     end;
-  end;
+  end
+  else
+    Result := $FFFF;
 end;
 
 end.
