@@ -13,7 +13,9 @@ procedure initGPIOChip;
 begin
   fHandle := FpOpen('/dev/gpiochip0', O_RDONLY);
   if fHandle < 0 then
-    writeln('Error opening handle to /dev/gpiochip0: ', fHandle);
+    writeln('Error opening handle to /dev/gpiochip0: ', fHandle)
+  else
+    writeln('success: ', fHandle);
 end;
 
 procedure finitGPIOChip;
