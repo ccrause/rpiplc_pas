@@ -14,8 +14,8 @@ const
 
 type
   Tgpiochip_info = record
-    name: string[GPIO_MAX_NAME_SIZE];
-    &label: string[GPIO_MAX_NAME_SIZE];
+    name: array[0..GPIO_MAX_NAME_SIZE-1] of char;
+    &label: array[0..GPIO_MAX_NAME_SIZE-1] of char;
     lines: uint32;
   end;
 
@@ -71,7 +71,7 @@ type
 
   Tgpio_v2_line_request = record
     offsets: array[0..GPIO_V2_LINES_MAX-1] of uint32;
-    consumer: string[GPIO_MAX_NAME_SIZE];
+    consumer: array[0..GPIO_MAX_NAME_SIZE-1] of char;
     config: Tgpio_v2_line_config;
     num_lines: uint32;
     event_buffer_size: uint32;
@@ -80,8 +80,8 @@ type
   end;
 
   Tgpio_v2_line_info = record
-    name: string[GPIO_MAX_NAME_SIZE];
-    consumer: string[GPIO_MAX_NAME_SIZE];
+    name: array[0..GPIO_MAX_NAME_SIZE-1] of char;
+    consumer: array[0..GPIO_MAX_NAME_SIZE-1] of char;
     offset: uint32;
     num_attrs: uint32;
     flags: uint64;
@@ -135,8 +135,8 @@ type
   Tgpioline_info = record
     line_offset: uint32;
     flags: uint32;
-    name: string[GPIO_MAX_NAME_SIZE];
-    consumer: string[GPIO_MAX_NAME_SIZE];
+    name: array[0..GPIO_MAX_NAME_SIZE-1] of char;
+    consumer: array[0..GPIO_MAX_NAME_SIZE-1] of char;
   end;
 
 const
@@ -169,7 +169,7 @@ type
     lineoffsets: array[0..GPIOHANDLES_MAX-1] of uint32;
     flags: uint32;
     default_values: array[0..GPIOHANDLES_MAX-1] of byte;
-    consumer_label: string[GPIO_MAX_NAME_SIZE];
+    consumer_label: array[0..GPIO_MAX_NAME_SIZE-1] of char;
     lines: uint32;
     fd: integer;
   end;
@@ -194,7 +194,7 @@ type
     lineoffset: uint32;
     handleflags: uint32;
     eventflags: uint32;
-    consumer_label: string[GPIO_MAX_NAME_SIZE];
+    consumer_label: array[0..GPIO_MAX_NAME_SIZE-1] of char;
     fd: integer;
   end;
 
