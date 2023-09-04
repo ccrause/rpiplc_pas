@@ -2,23 +2,25 @@ program test_gpio;
 
 { This program demonstrates pin access via the IOCTL interface. }
 
+// References
+// https://elixir.bootlin.com/linux/latest/source/tools/gpio/gpio-utils.c
+// https://elinux.org/images/9/9b/GPIO_for_Engineers_and_Makers.pdf
+// https://blog.lxsang.me/post/id/33
+
 uses
-  baseunix, gpio;
+  baseunix, gpio, sysutils;
 
 var
-  fHandle: integer;
-  fpins: array[0..63] of integer; // Store private file handle to pin IO
+  fPinHandles: array[0..63] of integer; // Store private file handle to pin IO
 
-procedure initGPIOChip;
+function initGPIOChip: integer;
 begin
-  fHandle := FpOpen('/dev/gpiochip0', O_RDONLY);
-  if fHandle < 0 then
-    writeln('Error opening handle to /dev/gpiochip0: ', fHandle)
-  else
-    writeln('success: ', fHandle);
+  Result := FpOpen('/dev/gpiochip0', O_RDONLY);
+  if Result < 0 then
+    writeln('Error opening handle to /dev/gpiochip0: ', errno);
 end;
 
-procedure finitGPIOChip;
+procedure finitGPIOChip(const fHandle: integer);
 begin
   if fHandle > -1 then
     FpClose(fHandle);
@@ -26,11 +28,13 @@ end;
 
 procedure printChipInfo;
 var
+  fHandle: integer;
   r: integer;
   info: Tgpiochip_info;
   line_info: Tgpioline_info;
   i: integer;
 begin
+  fHandle := initGPIOChip;
   if fHandle > -1 then
   begin
     r := FpIOCtl(fHandle, GPIO_GET_CHIPINFO_IOCTL, @info);
@@ -52,12 +56,108 @@ begin
     end
     else
       writeln('Error: ', r);
+    finitGPIOChip(fHandle);
   end;
 end;
 
+function getLineHandle(const pin, flags: integer; defaultValue: boolean): integer;
+var
+  fHandle: integer;
+  req: Tgpiohandle_request;
+  r: integer;
 begin
-  initGPIOChip;
+  FillByte(req, SizeOf(req), 0);
+  req.lineoffsets[0] := pin;
+  req.lines := 1;
+  req.flags := GPIOHANDLE_REQUEST_OUTPUT;
+  req.consumer_label[0] := '@';
+  req.consumer_label[1] := #0;
+
+  if defaultValue then
+    req.default_values[0] := 1;
+
+  fHandle := initGPIOChip;
+  if fHandle > -1 then
+  begin
+    r := FpIOCtl(fHandle, GPIO_GET_LINEHANDLE_IOCTL, @req);
+    finitGPIOChip(fHandle);
+
+    if r < 0 then
+    begin
+      Result := -1;
+      writeln('Unable to get line handle from ioctl: ', errno);
+    end
+    else
+      Result := req.fd;
+  end
+  else
+    Result := -1;
+end;
+
+procedure writePin(const fLineHandle, pin: integer; value: boolean);
+var
+  data: Tgpiohandle_data;
+  r: integer;
+begin
+  FillByte(data.values[0], SizeOf(data.values), 0);
+  if value then
+    data.values[0] := 1
+  else
+    data.values[0] := 0;
+
+  if fLineHandle > -1 then
+  begin
+    r := FpIOCtl(fLineHandle, GPIOHANDLE_SET_LINE_VALUES_IOCTL, @data);
+
+    if r = -1 then
+      writeln('Unable to set line value using ioctl :', errno);
+  end
+  else
+    writeln('Invalid line handle passed to writePin: ', fLineHandle);
+end;
+
+function readPin(const fLineHandle, pin: integer): boolean;
+var
+  data: Tgpiohandle_data;
+  r: integer;
+begin
+  Result := false;
+  FillByte(data.values[0], SizeOf(data.values), 0);
+
+  if fLineHandle > -1 then
+  begin
+    r := FpIOCtl(fLineHandle, GPIOHANDLE_GET_LINE_VALUES_IOCTL, @data);
+
+    if r = -1 then
+      writeln('Unable to set line value using ioctl :', errno)
+    else
+      Result := data.values[0] = 1;
+  end
+  else
+    writeln('Invalid line handle passed to writePin: ', fLineHandle);
+end;
+
+var
+  count: integer = 9;
+  fLineHandle: integer;
+
+begin
   printChipInfo;
-  finitGPIOChip;
+  fLineHandle := getLineHandle(26, GPIOHANDLE_REQUEST_INPUT, false);
+  if fLineHandle < 0 then exit;
+
+  repeat
+    writePin(fLineHandle, 26, true);  // pin 40 on header
+    writeln('*');
+    writeln('Reading: ', readPin(fLineHandle, 26));
+    sleep(1000);
+    writePin(fLineHandle, 26, false);  // pin 40 on header
+    writeln('.');
+    writeln('Reading: ', readPin(fLineHandle, 26));
+    sleep(1000);
+    dec(count);
+  until count < 1;
+
+  //printChipInfo;
 end.
 
