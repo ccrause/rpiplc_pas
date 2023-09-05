@@ -69,7 +69,7 @@ begin
   FillByte(req, SizeOf(req), 0);
   req.lineoffsets[0] := pin;
   req.lines := 1;
-  req.flags := GPIOHANDLE_REQUEST_OUTPUT;
+  req.flags := flags;
   req.consumer_label[0] := '@';
   req.consumer_label[1] := #0;
 
@@ -143,7 +143,7 @@ var
 
 begin
   printChipInfo;
-  fLineHandle := getLineHandle(26, GPIOHANDLE_REQUEST_INPUT, false);
+  fLineHandle := getLineHandle(26, GPIOHANDLE_REQUEST_OUTPUT, false);
   if fLineHandle < 0 then exit;
 
   repeat
@@ -158,6 +158,6 @@ begin
     dec(count);
   until count < 1;
 
-  //printChipInfo;
+  FpClose(fLineHandle);
 end.
 
