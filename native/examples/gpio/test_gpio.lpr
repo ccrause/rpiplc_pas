@@ -10,8 +10,8 @@ program test_gpio;
 uses
   baseunix, gpio, sysutils;
 
-var
-  fPinHandles: array[0..63] of integer; // Store private file handle to pin IO
+const
+  PinNumber = 26;
 
 function initGPIOChip: integer;
 begin
@@ -143,17 +143,17 @@ var
 
 begin
   printChipInfo;
-  fLineHandle := getLineHandle(26, GPIOHANDLE_REQUEST_OUTPUT, false);
+  fLineHandle := getLineHandle(PinNumber, GPIOHANDLE_REQUEST_OUTPUT, false);
   if fLineHandle < 0 then exit;
 
   repeat
-    writePin(fLineHandle, 26, true);  // pin 40 on header
+    writePin(fLineHandle, PinNumber, true);
     writeln('*');
-    writeln('Reading: ', readPin(fLineHandle, 26));
+    writeln('Reading: ', readPin(fLineHandle, PinNumber));
     sleep(1000);
-    writePin(fLineHandle, 26, false);  // pin 40 on header
+    writePin(fLineHandle, PinNumber, false);
     writeln('.');
-    writeln('Reading: ', readPin(fLineHandle, 26));
+    writeln('Reading: ', readPin(fLineHandle, PinNumber));
     sleep(1000);
     dec(count);
   until count < 1;
